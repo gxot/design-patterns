@@ -10,6 +10,7 @@ import br.pucpr.planet.PlanetaColumns;
 import br.pucpr.table.Table;
 import br.pucpr.table.TableBuilder;
 import br.pucpr.table.model.ColumnTableData;
+import br.pucpr.table.model.PaginatedTableData;
 import br.pucpr.user.*;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -48,9 +49,19 @@ public class Main {
     planetas.add(new Planet("Plutão", 2376, 5_906_380_000L, DWARF));
 
     System.out.println();
-    System.out.println("IMPRIMINDO PLANETAS");
+    System.out.println("IMPRIMINDO PLANETAS PAGINADOS");
     System.out.println("-------------------");
-    new Table(new ColumnTableData<>(planetas, PlanetaColumns.values())).print();
+    final var paginatedPlanets =
+        new PaginatedTableData(new ColumnTableData<>(planetas, PlanetaColumns.values()), 4);
+    final var planetsTable = new Table(paginatedPlanets);
+    paginatedPlanets.addObserver(
+        () -> {
+          System.out.println("Página mudou; redesenhando tabela...");
+          planetsTable.print();
+        });
+    planetsTable.print();
+    paginatedPlanets.nextPage();
+    paginatedPlanets.nextPage();
 
     System.out.println("PLANETAS REFLETIDOS");
     System.out.println("-------------------");
