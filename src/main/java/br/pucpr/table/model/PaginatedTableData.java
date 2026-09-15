@@ -1,8 +1,12 @@
 package br.pucpr.table.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class PaginatedTableData implements TableData {
   private final TableData data;
   private final int pageSize;
+  private final List<TableDataObserver> observers = new ArrayList<>();
   private int currentPage;
 
   public PaginatedTableData(TableData data, int pageSize) {
@@ -36,13 +40,23 @@ public class PaginatedTableData implements TableData {
   public void nextPage() {
     if (offset() + pageSize < data.rowCount()) {
       currentPage++;
+      notifyObservers();
     }
   }
 
   public void previousPage() {
     if (currentPage > 0) {
       currentPage--;
+      notifyObservers();
     }
+  }
+
+  public void addObserver(TableDataObserver observer) {
+    observers.add(observer);
+  }
+
+  public void removeObserver(TableDataObserver observer) {
+    observers.remove(observer);
   }
 
   public int currentPage() {
@@ -51,5 +65,11 @@ public class PaginatedTableData implements TableData {
 
   private int offset() {
     return currentPage * pageSize;
+  }
+
+  private void notifyObservers() {
+    for (var observer : observers) {
+      observer.onDataChanged();
+    }
   }
 }
